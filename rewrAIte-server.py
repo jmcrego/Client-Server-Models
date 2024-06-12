@@ -1,0 +1,67 @@
+import time
+import logging
+import argparse
+import numpy as np
+import ctranslate2
+from transformers import AutoTokenizer
+from flask import Flask, request, jsonify
+
+def run(generator, tokenizer, r): 
+    npar = r['npar']
+    level = r['level']
+    style = r['style']
+    domain = r['domain']
+    sentence = r['sentence']
+    logging.debug("[server] request: level={}, npar={}, style={} domain={} sentence={}".format(level, npar, style, domain, sentence))
+    
+    if level == 'Minimal':
+        instruction = f'Write {npar} paraphrases for the text below. Output only {npar} lines without comments, one parapharse per line, each begining by the string "<PAR>". Adopt a {style} writing style that aligns closely with a {domain} domain.'
+    else:
+        instruction = 'Rewrite the text below after fixing errors if any. Do not add comments. Do not paraphrase.'
+    prompt = f'<s>[INST] <<SYS>>\n{instruction}\n<</SYS>>\n\n{sentence} [/INST]'
+    logging.info(f'[server] PROMPT: {prompt}')
+    
+    tic = time.time()
+    prompt_tokens = tokenizer.convert_ids_to_tokens(tokenizer.encode(prompt))
+    results = generator.generate_batch([prompt_tokens], max_length=100, include_prompt_in_result=False)
+    output = tokenizer.decode(results[0].sequences_ids[0])
+    hyp = output.split('\n')
+    out = {'hyp': hyp}
+    toc = time.time()
+    logging.info('[server] ntoks={} time={:.2f} OUTPUT: '.format(len(results[0].sequences_ids[0]), toc-tic, output))
+    logging.debug('[server] answer: {} took {:.2f} sec'.format(out, toc-tic))
+    return out
+
+    
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='This script launches an LLM server behind a REST api (use: http://[host]:[port]/whisper).', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--host', type=str, help='Host used (use 0.0.0.0 to allow distant access, otherwise use 127.0.0.1)', default='0.0.0.0')
+    parser.add_argument('--port', type=int, help='Port used in local server', default=8001)
+    
+    group_model = parser.add_argument_group("LLM")
+    group_model.add_argument('--model_id',  type=str, help='HF model id', default='mistralai/Mistral-7B-v0.3')
+    group_model.add_argument('--model_dir', type=str, help='model local directory', default='/nfs/RESEARCH/senellarta/dev/research/ct2-mistral-instruct')
+    group_model.add_argument('--compute', type=str, help='compute type: int8, float16, int8_float16', default='float32')
+    group_model.add_argument('--device',  type=str, help='device: cpu, cuda, auto', default='auto')
+    
+    group_other = parser.add_argument_group("Other")
+    group_other.add_argument('--log', type=str, help='logging level: (verbose) debug, info, warning, error, critical (silent)', default='info')
+    args = parser.parse_args()
+    
+    logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, 'INFO'), filename=None)
+    logging.getLogger('transformers').setLevel(logging.ERROR)    
+    
+    t = AutoTokenizer.from_pretrained(args.model_id)
+    logging.debug('[server] Loaded tokenizer {}'.format(args.model_id))
+    
+    g = ctranslate2.Generator(args.model_dir, device=args.device, compute_type=args.compute)
+    logging.debug('[server] Loaded {}({}, {})'.format(args.model_dir, args.device, args.compute))
+        
+    app = Flask(__name__)
+    @app.route('/rewrAIte', methods=['POST'])
+    def send_data():
+        return jsonify(run(g, t, request.json))
+    
+    app.run(host=args.host, port=args.port)
+
