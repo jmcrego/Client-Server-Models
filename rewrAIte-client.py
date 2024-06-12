@@ -4,9 +4,8 @@ import logging
 import argparse
 import requests
 
-def send_request_to_server(url, timeout, sentence, level, style, domain, npar):
-    req = { 'sentence':sentence, 'level':level, 'style':style, 'domain':domain, 'npar':npar }
-    logging.debug('req: {}'.format(req))
+def send_request_to_server(url, timeout, prompt):
+    req = { 'prompt':prompt }
     tic = time.time()
     try:
         response = requests.post(url, json=req, headers={"Content-Type": "application/json"}, timeout=timeout)
@@ -53,5 +52,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, args.log.upper()), filename=None)
 
+    if args.level == 'Minimal':
+        instruction = 'Rewrite the Spanish text below after fixing errors (if any). Do not add comments. Do not paraphrase. Do not translate.'        
+    else:
+        instruction = f'Write {args.npar} paraphrases for the text below. Output only {args.npar} lines without comments, one parapharse per line, each begining by the string "<PAR>". Adopt a {args.style} writing style that aligns closely with a {args.domain} domain. Employ the same language as the given text.'
 
-    print(send_request_to_server(args.url, args.timeout, args.sentence, args.level, args.style, args.domain, args.npar))
+    prompt = f'<s>[INST] <<SYS>>\n{instruction}\n<</SYS>>\n\n{args.sentence} [/INST]'
+    print(send_request_to_server(args.url, args.timeout, prompt))
