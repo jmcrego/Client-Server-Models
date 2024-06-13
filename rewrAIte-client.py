@@ -5,8 +5,8 @@ import logging
 import argparse
 import requests
 
-def send_request_to_server(url, timeout, instruction, sentence, N):
-    req = { 'instruction':instruction, 'sentence':sentence, 'N': N}
+def send_request_to_server(url, timeout, instruction, text, N):
+    req = { 'instruction':instruction, 'text':text, 'N': N}
     tic = time.time()
     try:
         response = requests.post(url, json=req, headers={"Content-Type": "application/json"}, timeout=timeout)
