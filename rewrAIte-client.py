@@ -1,11 +1,12 @@
+import re
 import sys
 import time
 import logging
 import argparse
 import requests
 
-def send_request_to_server(url, timeout, prompt):
-    req = { 'prompt':prompt }
+def send_request_to_server(url, timeout, instruction, sentence, N):
+    req = { 'instruction':instruction, 'sentence':sentence, 'N': N}
     tic = time.time()
     try:
         response = requests.post(url, json=req, headers={"Content-Type": "application/json"}, timeout=timeout)
@@ -45,7 +46,8 @@ if __name__ == '__main__':
     parser.add_argument('--level', type=str, help='rewriting level: Minimal, Moderate, Extensive', default='Minimal')
     parser.add_argument('--style', type=str, help='writing style: Simple, Profesional, Academic, Casual', default='Simple')
     parser.add_argument('--domain', type=str, help='domain: Generic, Medical, Legal, Bank, Technical', default='Generic')
-    parser.add_argument('--npar', type=str, help='request npar paraphrases', default='three')
+    parser.add_argument('--lang', type=str, help='language of the paraphrase writer', default='English')
+    parser.add_argument('--npar', type=int, help='request npar paraphrases', default=3)
     parser.add_argument('--timeout', type=float, help='url request timeout', default=10.0)
     group_other = parser.add_argument_group("Other")
     group_other.add_argument('--log', type=str, help='logging level: (verbose) debug, info, warning, error, critical (silent)', default='warning')
@@ -53,9 +55,32 @@ if __name__ == '__main__':
     logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, args.log.upper()), filename=None)
 
     if args.level == 'Minimal':
-        instruction = 'Rewrite the Spanish text below after fixing errors (if any). Do not add comments. Do not paraphrase. Do not translate.'        
+        instruction = f'You are a proficient text corrector. Rewrite the text below only fixing errors when necessary (leave the rest as it is). Output your rewrite in a single line finished by the tag <eos>. Do not add comments.'
     else:
-        instruction = f'Write {args.npar} paraphrases for the text below. Output only {args.npar} lines without comments, one parapharse per line, each begining by the string "<PAR>". Adopt a {args.style} writing style that aligns closely with a {args.domain} domain. Employ the same language as the given text.'
+        instruction = f'You are a proficient {args.lang} writer in the {args.domain} domain with a {args.style} style. Write {args.npar} paraphrases for the text below. Each paraphrase is output in a different line. Do not add comments.'
 
-    prompt = f'<s>[INST] <<SYS>>\n{instruction}\n<</SYS>>\n\n{args.sentence} [/INST]'
-    print(send_request_to_server(args.url, args.timeout, prompt))
+    str_domain = f" specialized in the {args.domain} domain" if args.domain != "Generic" else ""
+    str_style = f" employing a {args.style} style" if args.style != "Generic" else ""
+    
+    instruction = f"You are an expert {args.lang} proofreader{str_domain}{str_style}. Given the text below, first rewrite it fixing errors if any (leave correct parts unchanged), and then write {args.npar} paraphrases with a {args.style} rewriting level. All your sentences must be grammatically correct. Do not add any comments and write only in {args.lang}."
+
+        
+    out = send_request_to_server(args.url, args.timeout, instruction, args.sentence, args.npar*2)['hyp']
+    for i,l in enumerate(out.split('\n')):
+        if len(l) and not re.match(r'^Paraphrases:\s*$', l):
+            if i==0:
+                print(l)
+            else:
+                l = re.sub(r'^\d\.\s*', '', l)
+                print(l)
+            
+
+
+'''My moder was in the kitxen.
+<correct> My mother was in the kitchen yesterday. </correct>
+<paraphrase> My mom was yesterday in her kitchen. </paraphrase>
+<paraphrase> Yesterday, my mother was in the kitchen. </paraphrase>
+<paraphrase> Yesterday, my lovely mom was in the kitchen. </paraphrase>
+<</SYS>>    
+{args.sentence} [/INST]'''
+    
