@@ -54,16 +54,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
     logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, args.log.upper()), filename=None)
 
-    if args.level == 'Minimal':
-        instruction = f'You are a proficient text corrector. Rewrite the text below only fixing errors when necessary (leave the rest as it is). Output your rewrite in a single line finished by the tag <eos>. Do not add comments.'
-    else:
-        instruction = f'You are a proficient {args.lang} writer in the {args.domain} domain with a {args.style} style. Write {args.npar} paraphrases for the text below. Each paraphrase is output in a different line. Do not add comments.'
-
     str_domain = f" specialized in the {args.domain} domain" if args.domain != "Generic" else ""
     str_style = f" employing a {args.style} style" if args.style != "Generic" else ""
-    
     instruction = f"You are an expert {args.lang} proofreader{str_domain}{str_style}. Given the text below, first rewrite it fixing errors if any (leave correct parts unchanged), and then write {args.npar} paraphrases with a {args.style} rewriting level. All your sentences must be grammatically correct. Do not add any comments and write only in {args.lang}."
-
         
     out = send_request_to_server(args.url, args.timeout, instruction, args.sentence, args.npar*2)['hyp']
     for i,l in enumerate(out.split('\n')):
@@ -73,14 +66,3 @@ if __name__ == '__main__':
             else:
                 l = re.sub(r'^\d\.\s*', '', l)
                 print(l)
-            
-
-
-'''My moder was in the kitxen.
-<correct> My mother was in the kitchen yesterday. </correct>
-<paraphrase> My mom was yesterday in her kitchen. </paraphrase>
-<paraphrase> Yesterday, my mother was in the kitchen. </paraphrase>
-<paraphrase> Yesterday, my lovely mom was in the kitchen. </paraphrase>
-<</SYS>>    
-{args.sentence} [/INST]'''
-    
