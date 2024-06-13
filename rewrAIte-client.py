@@ -42,13 +42,13 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='This script calls a rewrAIt server.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('url', type=str, help='server url (Ex: http://0.0.0.0:8001/rewrAIte)')
-    parser.add_argument('--sentence', type=str, help='input sentence', required=True)
-    parser.add_argument('--level', type=str, help='rewriting level: Minimal, Moderate, Extensive', default='Minimal')
-    parser.add_argument('--style', type=str, help='writing style: Simple, Profesional, Academic, Casual', default='Simple')
-    parser.add_argument('--domain', type=str, help='domain: Generic, Medical, Legal, Bank, Technical', default='Generic')
-    parser.add_argument('--lang', type=str, help='language of the paraphrase writer', default='English')
-    parser.add_argument('--npar', type=int, help='request npar paraphrases', default=3)
-    parser.add_argument('--timeout', type=float, help='url request timeout', default=10.0)
+    parser.add_argument('--text',     type=str,   help='text to rewrite', required=True)
+    parser.add_argument('--level',    type=str,   help='rewriting level: Minimal, Moderate, Extensive', default='Minimal')
+    parser.add_argument('--style',    type=str,   help='writing style: Generic, Simple, Profesional, Academic, Casual', default='Simple')
+    parser.add_argument('--domain',   type=str,   help='domain: Generic, Medical, Legal, Bank, Technical', default='Generic')
+    parser.add_argument('--lang',     type=str,   help='language of the paraphrase writer', default='English')
+    parser.add_argument('--npar',     type=int,   help='request npar paraphrases', default=3)
+    parser.add_argument('--timeout',  type=float, help='url request timeout', default=10.0)
     group_other = parser.add_argument_group("Other")
     group_other.add_argument('--log', type=str, help='logging level: (verbose) debug, info, warning, error, critical (silent)', default='warning')
     args = parser.parse_args()
@@ -58,9 +58,8 @@ if __name__ == '__main__':
     str_style = f" employing a {args.style} style" if args.style != "Generic" else ""
     instruction = f"You are an expert {args.lang} proofreader{str_domain}{str_style}. Given the text below, first rewrite it fixing errors if any (leave correct parts unchanged), and then write {args.npar} paraphrases with a {args.style} rewriting level. All your sentences must be grammatically correct. Do not add any comments and write only in {args.lang}."
         
-    out = send_request_to_server(args.url, args.timeout, instruction, args.sentence, args.npar*2)['hyp']
-    for i,l in enumerate(out.split('\n')):
-        if len(l) and not re.match(r'^Paraphrases:\s*$', l):
+    for i,l in enumerate(send_request_to_server(args.url, args.timeout, instruction, args.text, args.npar*2)['hyp'].split('\n')):
+        if len(l): # and not re.match(r'^Paraphrases:\s*$', l):
             if i==0:
                 print(l)
             else:
