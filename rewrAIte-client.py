@@ -53,15 +53,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
     logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, args.log.upper()), filename=None)
 
-    str_domain = f" specialized in the {args.domain} domain" if args.domain != "Generic" else ""
-    str_style = f" employing a {args.style} style" if args.style != "Generic" else ""
-
+    text = '<txt> '+args.text+' </txt>'
     instruction = f"""You are an expert proofreader employing language={args.lang}, domain={args.domain} and writing style={args.style}. Rewrite first the text below only correcting errors (do not add/remove/replace words unless incorrect), and add {args.n} different paraphrases to the original text. All your sentences must be grammatically correct and convey the same meaning. Your output does not contain explanations. Your only write in {args.lang}. Follow the next formatting exemples:
 
 <txt> Mon ami ne veux pas manger de la viande. </txt>
 <fix> Mon ami ne veut pas manger de viande. </fix>
 <par> Mon ami n'aime pas manger de la viande. </par>
-<par> Je ne mange pas de viande, selon mon ami. </par>
 <par> Mon ami préfère ne pas manger de viande. </par>
 
 <txt> Leaders of the world's seven richer nations are expected to agre a plan to use frozen Russian assets to raise money for Ukraine. </txt>
@@ -69,9 +66,9 @@ if __name__ == '__main__':
 <par> The leaders of the world's seven richest nations are anticipated to reach a consensus on a strategy to tap into frozen Russian assets to fund Ukraine. </par>
 <par> It is expected that the leaders of the seven wealthiest nations will agree on a plan to access frozen Russian assets to provide funds for Ukraine. </par>
 <par> The leaders of the seven richest nations are expected to concur on a strategy to use frozen Russian assets to generate funds for Ukraine's benefit. </par>"""
+    n = args.n*2
 
-
-    out = send_request_to_server(args.url, args.timeout, instruction, '<txt> '+args.text+' </txt>', args.n*2)['hyp']
+    out = send_request_to_server(args.url, args.timeout, instruction, text, n)['hyp']
     for i,l in enumerate(out.split('\n')):
         if len(l):
             print(l)
