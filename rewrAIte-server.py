@@ -6,15 +6,20 @@ import ctranslate2
 from transformers import AutoTokenizer
 from flask import Flask, request, jsonify
 
-def run(generator, tokenizer, r): 
-    logging.debug("[server] request: prompt={}".format(r['prompt']))    
+def run(generator, tokenizer, r):
+    instruction = r['instruction']
+    text = r['text']
+    N = int(r['N'])
+    prompt = f'<s>[INST] <<SYS>>\n{instruction}\n<</SYS>>\n\n{text} [/INST]'
     tic = time.time()
-    prompt_tokens = tokenizer.convert_ids_to_tokens(tokenizer.encode(r['prompt']))
-    max_length = len(prompt_tokens) * (int(r['npar']) + 1)
+    max_length = len(tokenizer.encode(text)) * (N+1)
+    logging.debug(f"[server] text with {len(tokenizer.encode(text))} tokens, N={N}")
+    prompt_tokens = tokenizer.convert_ids_to_tokens(tokenizer.encode(prompt))
+    logging.debug(f"[server] request: max_length={max_length} prompt={prompt}")
     results = generator.generate_batch([prompt_tokens], max_length=max_length, include_prompt_in_result=False)
     output = tokenizer.decode(results[0].sequences_ids[0])
     toc = time.time()
-    logging.debug('[server] response: time={:.2f} output={}'.format(toc-tic, output))
+    logging.debug('[server] response: time={:.2f} length={} output={}'.format(toc-tic, len(results[0].sequences_ids[0]), output))
     return {'hyp': output}
 
     
