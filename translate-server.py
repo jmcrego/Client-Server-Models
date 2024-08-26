@@ -53,9 +53,10 @@ def load_models_if_required(cfg):
 
 def run(r):
     start_time = time.time()
-    cfg = r.get('cfg', None)
-    txt = r.get('txt', None)
-    logging.info(f"REQ: cfg={cfg} txt={txt}")
+    cfg = r.pop('cfg', None)
+    txt = r.pop('txt', None)
+    ct2_options = r.pop('ct2', {})
+    logging.info(f"REQ: cfg={cfg} txt={txt} ct2={ct2_options}")
 
     if txt is None or cfg is None:
         logging.info(f'Error: missing required parameter in request')
@@ -87,7 +88,7 @@ def run(r):
     logging.info(f'TOK: msec={1000 * (time.time() - tic):.2f} txt_tok={txt_tok}')
     
     tic = time.time()
-    out_tok = ct2.translate_batch([txt_tok])[0].hypotheses[0]
+    out_tok = ct2.translate_batch([txt_tok], **ct2_options)[0].hypotheses[0]
     ct2_time = time.time() - tic
     logging.info(f'CT2: msec={1000 * (time.time() - tic):.2f} out_tok={out_tok}')
     
