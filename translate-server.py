@@ -88,8 +88,10 @@ def run(r):
     logging.info(f'TOK: msec={1000 * (time.time() - tic):.2f} txt_tok={txt_tok}')
     
     tic = time.time()
-    hyp = ct2.translate_batch([txt_tok], **dec)
-    print(len(hyp[0]))
+    hyp = ct2.translate_batch([txt_tok], **dec)[0]
+    print(len(hyp.hypotheses))
+    print(len(hyp.scores))
+    print(len(hyp.attention))
     print(hyp)
     out_tok = ct2.translate_batch([txt_tok], **dec)[0].hypotheses[0]
     ct2_time = time.time() - tic
