@@ -104,11 +104,11 @@ def run(r):
             "out_tok": out_tok,
             "out": out,
             "msec": {
-                "load_tok": f"{load_tok_time:.2f}",
-                "load_ct2": f"{load_ct2_time:.2f}",
-                "tok": f"{tok_time:.2f}",
-                "ct2": f"{ct2_time:.2f}",
-                "detok": f"{detok_time:.2f}",
+                "load_tok": f"{1000 * load_tok_time:.2f}",
+                "load_ct2": f"{1000 * load_ct2_time:.2f}",
+                "tok": f"{1000 * tok_time:.2f}",
+                "ct2": f"{1000 * ct2_time:.2f}",
+                "detok": f"{1000 * detok_time:.2f}",
                 "total": f"{1000 * (time.time() - start_time):.2f}"
             }
         }
