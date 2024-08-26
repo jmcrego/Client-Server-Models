@@ -25,6 +25,9 @@ def load_models_if_required(cfg):
     tok_config = os.path.join(cfg, 'tok_config.json')
     ct2_config = os.path.join(cfg, 'ct2_config.json')
 
+    load_tok_time = 0
+    load_ct2_time = 0
+    
     global tok, ct2, loaded_cfg
 
     if tok is None or cfg != loaded_cfg:
@@ -33,7 +36,8 @@ def load_models_if_required(cfg):
             tic = time.time()
             mode = config.pop('mode', 'aggressive')
             tok = pyonmttok.Tokenizer(mode, **config)
-            logging.info(f'LOAD: msec={1000 * (time.time() - tic):.2f} tok_config={tok_config}')
+            load_tok_time = time.time() - tic
+            logging.info(f'LOAD: msec={1000 * load_tok_time:.2f} tok_config={tok_config}')
 
     if ct2 is None or cfg != loaded_cfg:
         config = read_json_config(ct2_config)
@@ -41,18 +45,19 @@ def load_models_if_required(cfg):
             tic = time.time()
             model_path = config.pop('model_path', None)
             ct2 = ctranslate2.Translator(model_path, **config)
-            logging.info(f'LOAD: msec={1008 * (time.time() - tic):.2f} ct2_config={ct2_config}')
+            load_ct2_time = time.time() - tic
+            logging.info(f'LOAD: msec={1008 * load_ct2_time:.2f} ct2_config={ct2_config}')
 
     loaded_cfg = cfg
-    return
+    return load_tok_time, load_ct2_time
 
 def run(r):
+    start_time = time.time()
     #cfg = event.get('queryStringParameters', {}).get('cfg', None)
     #txt = event.get('queryStringParameters', {}).get('txt', None)
     cfg = r.get('cfg', None)
     txt = r.get('txt', None)
     logging.info(f"REQ: cfg={cfg} txt={txt}")
-    start_time = time.time()
 
     if txt is None or cfg is None:
         logging.info(f'Error: missing required parameter in request')
@@ -64,7 +69,7 @@ def run(r):
             })
         }
 
-    load_models_if_required(cfg)
+    load_tok_time, load_ct2_time = load_models_if_required(cfg)
 
     global tok, ct2
     
@@ -90,7 +95,7 @@ def run(r):
 
     tic = time.time()
     out = tok.detokenize(out_tok)
-    tok_time = time.time() - tic
+    detok_time = time.time() - tic
     logging.info(f'TOK: msec={1000 * (time.time() - tic):.2f} out={out}')
 
     return {
@@ -100,8 +105,14 @@ def run(r):
             "txt_tok": txt_tok,
             "out_tok": out_tok,
             "out": out,
-            "msec": f"{1000 * (time.time() - start_time):.2f}"
-        }
+            "msec": {
+                "load_tok": f"{load_tok_time:.2f}",
+                "load_ct2": f"{load_ct2_time:.2f}",
+                "tok": f"{tok_time:.2f}",
+                "ct2": f"{ct2_time:.2f}",
+                "detok": f"{detok_time:.2f}"
+                "total": f"{1000 * (time.time() - start_time):.2f}",
+            }
     }
 
 
@@ -115,7 +126,7 @@ if __name__ == '__main__':
     logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, 'INFO'), filename=None)
 
     if args.cfg is not None:
-        load_models_if_required(args.cfg)
+        _, _ = load_models_if_required(args.cfg)
     
     app = Flask(__name__)    
     @app.route('/translate', methods=['POST'])
