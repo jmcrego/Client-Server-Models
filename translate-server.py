@@ -88,11 +88,15 @@ def run(r):
     logging.info(f'TOK: msec={1000 * (time.time() - tic):.2f} txt_tok={txt_tok}')
     
     tic = time.time()
-    hyp = ct2.translate_batch([txt_tok], **dec)[0]
-    print(len(hyp.hypotheses))
-    print(len(hyp.scores))
-    print(len(hyp.attention))
-    print(hyp)
+    out = [] #{ 'tok': [], 'scores': [], 'attention': [] }
+    res = ct2.translate_batch([txt_tok], **dec)
+    for i in range(len(res[0].hypotheses)):
+        d = {
+            'tok': res[0].hypotheses[i]
+            'scores': res[0].scores[i] if len(res[0].scores)>i else None
+        }
+        out.append(d)
+    print(out)
     out_tok = ct2.translate_batch([txt_tok], **dec)[0].hypotheses[0]
     ct2_time = time.time() - tic
     logging.info(f'CT2: msec={1000 * (time.time() - tic):.2f} out_tok={out_tok}')
