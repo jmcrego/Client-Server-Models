@@ -7,8 +7,8 @@ import pyonmttok
 import ctranslate2
 from flask import Flask, request, jsonify
 
-tok = None
-ct2 = None
+Tok = None
+Ct2 = None
 loaded_cfg = None
 
 def read_json_config(config_file):
@@ -28,23 +28,23 @@ def load_models_if_required(cfg):
     load_tok_time = 0
     load_ct2_time = 0
     
-    global tok, ct2, loaded_cfg
+    global Tok, Ct2, loaded_cfg
 
-    if tok is None or cfg != loaded_cfg:
+    if Tok is None or cfg != loaded_cfg:
         config = read_json_config(tok_config)
         if config is not None:
             tic = time.time()
             mode = config.pop('mode', 'aggressive')
-            tok = pyonmttok.Tokenizer(mode, **config)
+            Tok = pyonmttok.Tokenizer(mode, **config)
             load_tok_time = time.time() - tic
             logging.info(f'LOAD: msec={1000 * load_tok_time:.2f} tok_config={tok_config}')
 
-    if ct2 is None or cfg != loaded_cfg:
+    if Ct2 is None or cfg != loaded_cfg:
         config = read_json_config(ct2_config)
         if config is not None:
             tic = time.time()
             model_path = config.pop('model_path', None)
-            ct2 = ctranslate2.Translator(model_path, **config)
+            Ct2 = ctranslate2.Translator(model_path, **config)
             load_ct2_time = time.time() - tic
             logging.info(f'LOAD: msec={1008 * load_ct2_time:.2f} ct2_config={ct2_config}')
 
@@ -70,9 +70,9 @@ def run(r):
 
     load_tok_time, load_ct2_time = load_models_if_required(cfg)
     
-    global tok, ct2
+    global Tok, Ct2
     
-    if tok is None or ct2 is None:
+    if Tok is None or Ct2 is None:
         logging.info(f'error: resources unavailable')
         return {
             'statusCode': 400,
@@ -83,7 +83,7 @@ def run(r):
         }
     
     tic = time.time()
-    tok, _ = tok.tokenize(txt)
+    tok, _ = Tok.tokenize(txt)
     tok_time = time.time() - tic
     logging.info(f'TOK: msec={1000 * (time.time() - tic):.2f} tok={tok}')
     
