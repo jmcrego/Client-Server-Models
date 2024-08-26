@@ -7,8 +7,8 @@ import pyonmttok
 import ctranslate2
 from flask import Flask, request, jsonify
 
-Tok = None
-Ct2 = None
+Tokenizer = None
+Translator = None
 loaded_cfg = None
 
 def read_json_config(config_file):
@@ -28,23 +28,23 @@ def load_models_if_required(cfg):
     load_tok_time = 0
     load_ct2_time = 0
     
-    global Tok, Ct2, loaded_cfg
+    global Tokenizer, Translator, loaded_cfg
 
-    if Tok is None or cfg != loaded_cfg:
+    if Tokenizer is None or cfg != loaded_cfg:
         config = read_json_config(tok_config)
         if config is not None:
             tic = time.time()
             mode = config.pop('mode', 'aggressive')
-            Tok = pyonmttok.Tokenizer(mode, **config)
+            Tokenizer = pyonmttok.Tokenizer(mode, **config)
             load_tok_time = time.time() - tic
             logging.info(f'LOAD: msec={1000 * load_tok_time:.2f} tok_config={tok_config}')
 
-    if Ct2 is None or cfg != loaded_cfg:
+    if Translator is None or cfg != loaded_cfg:
         config = read_json_config(ct2_config)
         if config is not None:
             tic = time.time()
             model_path = config.pop('model_path', None)
-            Ct2 = ctranslate2.Translator(model_path, **config)
+            Translator = ctranslate2.Translator(model_path, **config)
             load_ct2_time = time.time() - tic
             logging.info(f'LOAD: msec={1008 * load_ct2_time:.2f} ct2_config={ct2_config}')
 
@@ -70,9 +70,9 @@ def run(r):
 
     load_tok_time, load_ct2_time = load_models_if_required(cfg)
     
-    global Tok, Ct2
+    global Tokenizer, Translator
     
-    if Tok is None or Ct2 is None:
+    if Tokenizer is None or Translator is None:
         logging.info(f'error: resources unavailable')
         return {
             'statusCode': 400,
@@ -83,17 +83,17 @@ def run(r):
         }
     
     tic = time.time()
-    tok, _ = Tok.tokenize(txt)
+    tok, _ = Tokenizer.tokenize(txt)
     tok_time = time.time() - tic
     logging.info(f'TOK: msec={1000 * (time.time() - tic):.2f} tok={tok}')
     
     tic = time.time()
     out = []
-    res = Ct2.translate_batch([tok], **dec)
+    res = Translator.translate_batch([tok], **dec)
     for i in range(len(res[0].hypotheses)):
         out.append({
             'tok': res[0].hypotheses[i],
-            'txt': tok.detokenize(res[0].hypotheses[i]),
+            'txt': Tokenizer.detokenize(res[0].hypotheses[i]),
             'scores': res[0].scores[i] if len(res[0].scores)>i else None,
             'attention': res[0].attention[i] if len(res[0].attention)>i else None
         })
