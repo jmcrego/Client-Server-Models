@@ -45,6 +45,7 @@ if __name__ == '__main__':
     parser.add_argument('--timeout', type=float, help='url request timeout', default=10.0)
     args = parser.parse_args()
     args.ct2 = json.loads(args.ct2)
+    print(args.ct2)
     logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, 'INFO'), filename=None)
 
 
