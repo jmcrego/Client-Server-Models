@@ -56,12 +56,12 @@ if __name__ == '__main__':
     if args.txt is not None:
         out = send_request_to_server(args.url, args.timeout, args.cfg, args.dec, args.txt)
         print(json.dumps(out, indent=4, ensure_ascii=False))
-        logging.info(f'client msec={1000*(time.time()-tic):.2f}')
 
     else:
         with open(args.doc, 'r') as fd:
             for l in fd:
                 out = send_request_to_server(args.url, args.timeout, args.cfg, args.dec, l.strip())
                 print(json.dumps(out, indent=4, ensure_ascii=False))
-                logging.info(f'client msec={1000*(time.time()-tic):.2f}')
+                
+    logging.info(f'client msec={1000*(time.time()-tic):.2f}')
         
