@@ -48,5 +48,5 @@ if __name__ == '__main__':
     tic = time.time()
     out = send_request_to_server(args.url, args.timeout, args.cfg, args.txt)
     print(out)
-    logging.info('client msec={1000*(time.time()-tic):.2f}')
+    logging.info(f'client msec={1000*(time.time()-tic):.2f}')
 
