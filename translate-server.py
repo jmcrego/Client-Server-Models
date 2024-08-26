@@ -97,10 +97,10 @@ def run(r):
             'scores': res[0].scores[i] if len(res[0].scores)>i else None,
             'attention': res[0].attention[i] if len(res[0].attention)>i else None
         })
-    print(out)
     #out_tok = ct2.translate_batch([txt_tok], **dec)[0].hypotheses[0]
     ct2_time = time.time() - tic
-    logging.info(f'CT2: msec={1000 * (time.time() - tic):.2f} out_tok={out_tok}')
+    logging.info(f'CT2: msec={1000 * (time.time() - tic):.2f} out={out}')
+#    logging.info(f'CT2: msec={1000 * (time.time() - tic):.2f} out_tok={out_tok}')
     
 #    tic = time.time()
 #    out = tok.detokenize(out_tok)
