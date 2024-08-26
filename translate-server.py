@@ -92,7 +92,7 @@ def run(r):
     res = ct2.translate_batch([txt_tok], **dec)
     for i in range(len(res[0].hypotheses)):
         d = {
-            'tok': res[0].hypotheses[i]
+            'tok': res[0].hypotheses[i],
             'scores': res[0].scores[i] if len(res[0].scores)>i else None
         }
         out.append(d)
