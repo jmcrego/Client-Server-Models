@@ -41,17 +41,16 @@ if __name__ == '__main__':
     parser.add_argument('--txt',     type=str,   help='text to translate', required=True)
     parser.add_argument('--cfg',     type=str,   help='config resources', required=True)
     parser.add_argument('--url',     type=str,   help='server url entry point', default='http://0.0.0.0:5000/translate')
-    parser.add_argument('--ct2',     type=str,   help='ctranslate2 inference JSON dictionary (see https://opennmt.net/CTranslate2/decoding.html for decoding options)', default='{"beam_size": 5, "num_hypotheses": 1}')
+    parser.add_argument('--dec',     type=str,   help='ctranslate2 decoding options in JSON dictionary (see https://opennmt.net/CTranslate2/decoding.html for available options)', default='{"beam_size": 5, "num_hypotheses": 1}')
     parser.add_argument('--timeout', type=float, help='url request timeout', default=10.0)
     args = parser.parse_args()
-    args.ct2 = json.loads(args.ct2)
-    print(args.ct2)
+    args.dec = json.loads(args.dec)
     logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, 'INFO'), filename=None)
 
 
     
     tic = time.time()
-    out = send_request_to_server(args.url, args.timeout, args.cfg, args.txt, args.ct2)
+    out = send_request_to_server(args.url, args.timeout, args.cfg, args.dec, args.txt)
     print(json.dumps(out, indent=4, ensure_ascii=False))
     logging.info(f'client msec={1000*(time.time()-tic):.2f}')
 
