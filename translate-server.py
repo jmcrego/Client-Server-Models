@@ -53,8 +53,6 @@ def load_models_if_required(cfg):
 
 def run(r):
     start_time = time.time()
-    #cfg = event.get('queryStringParameters', {}).get('cfg', None)
-    #txt = event.get('queryStringParameters', {}).get('txt', None)
     cfg = r.get('cfg', None)
     txt = r.get('txt', None)
     logging.info(f"REQ: cfg={cfg} txt={txt}")
@@ -70,7 +68,7 @@ def run(r):
         }
 
     load_tok_time, load_ct2_time = load_models_if_required(cfg)
-
+    
     global tok, ct2
     
     if tok is None or ct2 is None:
@@ -82,22 +80,22 @@ def run(r):
                 "msec": f"{1000 * (time.time() - start_time):.2f}"
             }
         }
-
+    
     tic = time.time()
     txt_tok, _ = tok.tokenize(txt)
     tok_time = time.time() - tic
     logging.info(f'TOK: msec={1000 * (time.time() - tic):.2f} txt_tok={txt_tok}')
-
+    
     tic = time.time()
     out_tok = ct2.translate_batch([txt_tok])[0].hypotheses[0]
     ct2_time = time.time() - tic
     logging.info(f'CT2: msec={1000 * (time.time() - tic):.2f} out_tok={out_tok}')
-
+    
     tic = time.time()
     out = tok.detokenize(out_tok)
     detok_time = time.time() - tic
     logging.info(f'TOK: msec={1000 * (time.time() - tic):.2f} out={out}')
-
+    
     return {
         'statusCode': 200,
         'body': {
@@ -110,12 +108,13 @@ def run(r):
                 "load_ct2": f"{load_ct2_time:.2f}",
                 "tok": f"{tok_time:.2f}",
                 "ct2": f"{ct2_time:.2f}",
-                "detok": f"{detok_time:.2f}"
-                "total": f"{1000 * (time.time() - start_time):.2f}",
+                "detok": f"{detok_time:.2f}",
+                "total": f"{1000 * (time.time() - start_time):.2f}"
             }
+        }
     }
-
-
+        
+        
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Description.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
