@@ -2,6 +2,7 @@ import os
 import json
 import time
 import logging
+import argparse
 import pyonmttok
 import ctranslate2
 from flask import Flask, request, jsonify
@@ -45,12 +46,13 @@ def load_models_if_required(cfg):
     loaded_cfg = cfg
     return
 
-def lambda_handler(event):
-    print(event)
+def run(r):
+    #cfg = event.get('queryStringParameters', {}).get('cfg', None)
+    #txt = event.get('queryStringParameters', {}).get('txt', None)
+    cfg = r.get('cfg', None)
+    txt = r.get('txt', None)
+    logging.info(f"REQ: cfg={cfg} txt={txt}")
     start_time = time.time()
-    cfg = event.get('queryStringParameters', {}).get('cfg', None)
-    txt = event.get('queryStringParameters', {}).get('txt', None)
-    logging.info(f'REQUEST: cfg={cfg} txt={txt}')
 
     if txt is None or cfg is None:
         logging.info(f'Error: missing required parameter in request')
@@ -58,21 +60,22 @@ def lambda_handler(event):
             'statusCode': 400,
             'body': json.dumps({
                 "error": "missing required parameter in request",
-                "duration": time.time() - start_time
+                "msec": 1000 * (time.time() - start_time)
             })
         }
 
     load_models_if_required(cfg)
 
     global tok, ct2
+    
     if tok is None or ct2 is None:
         logging.info(f'error: resources unavailable')
         return {
             'statusCode': 400,
-            'body': json.dumps({
+            'body': {
                 "error": "resources unavailable",
-                "duration": time.time() - start_time
-            })
+                "msec": 1000 * (time.time() - start_time)
+            }
         }
 
     tic = time.time()
@@ -92,21 +95,28 @@ def lambda_handler(event):
 
     return {
         'statusCode': 200,
-        'body': json.dumps({
+        'body': {
             "txt": txt,
             "txt_tok": txt_tok,
             "out_tok": out_tok,
             "out": out,
-            "duration": time.time() - start_time
-        })
+            "msec": 1000 * (time.time() - start_time)
+        }
     }
 
 
-app = Flask(__name__)
-
-@app.route('/translate', methods=['POST'])
-def translate():
-    return lambda_handler(request.json)
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+
+    parser = argparse.ArgumentParser(description='Description.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--host', type=str, help='Host used (use 0.0.0.0 to allow distant access, otherwise use 127.0.0.1)', default='0.0.0.0')
+    parser.add_argument('--port', type=int, help='Port used in local server', default=5000)
+    args = parser.parse_args()
+    logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, 'INFO'), filename=None)
+    
+    app = Flask(__name__)    
+    @app.route('/translate', methods=['POST'])
+    def send_data():
+        return jsonify(run(request.json))
+    
+    app.run(host=args.host, port=args.port)
+
