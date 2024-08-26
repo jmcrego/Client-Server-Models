@@ -110,8 +110,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Description.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--host', type=str, help='Host used (use 0.0.0.0 to allow distant access, otherwise use 127.0.0.1)', default='0.0.0.0')
     parser.add_argument('--port', type=int, help='Port used in local server', default=5000)
+    parser.add_argument('--cfg',  type=str, help='Load model when launching', default=None)
     args = parser.parse_args()
     logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, 'INFO'), filename=None)
+
+    if args.cfg is not None:
+        load_models_if_required(args.cfg)
     
     app = Flask(__name__)    
     @app.route('/translate', methods=['POST'])
