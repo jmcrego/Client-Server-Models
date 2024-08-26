@@ -89,7 +89,7 @@ def run(r):
     
     tic = time.time()
     hyp = ct2.translate_batch([txt_tok], **dec)
-    print(len(hyp))
+    print(len(hyp[0]))
     print(hyp)
     out_tok = ct2.translate_batch([txt_tok], **dec)[0].hypotheses[0]
     ct2_time = time.time() - tic
