@@ -119,7 +119,7 @@ def run(r):
                 "load_ct2": f"{1000 * load_ct2_time:.2f}",
                 "tok": f"{1000 * tok_time:.2f}",
                 "ct2": f"{1000 * ct2_time:.2f}",
-                "detok": f"{1000 * detok_time:.2f}",
+#                "detok": f"{1000 * detok_time:.2f}",
                 "total": f"{1000 * (time.time() - start_time):.2f}"
             }
         }
