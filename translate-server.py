@@ -93,8 +93,8 @@ def run(r):
     for i in range(len(res[0].hypotheses)):
         out.append({
             'tok': res[0].hypotheses[i],
-            'raw': tok.detokenize(res[0].hypotheses[i])
-            'scores': res[0].scores[i] if len(res[0].scores)>i else None
+            'raw': tok.detokenize(res[0].hypotheses[i]),
+            'scores': res[0].scores[i] if len(res[0].scores)>i else None,
             'attention': res[0].attention[i] if len(res[0].attention)>i else None
         })
     print(out)
