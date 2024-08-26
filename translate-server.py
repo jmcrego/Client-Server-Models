@@ -88,30 +88,31 @@ def run(r):
     logging.info(f'TOK: msec={1000 * (time.time() - tic):.2f} txt_tok={txt_tok}')
     
     tic = time.time()
-    out = [] #{ 'tok': [], 'scores': [], 'attention': [] }
+    out = []
     res = ct2.translate_batch([txt_tok], **dec)
     for i in range(len(res[0].hypotheses)):
-        d = {
+        out.append({
             'tok': res[0].hypotheses[i],
+            'raw': tok.detokenize(res[0].hypotheses[i])
             'scores': res[0].scores[i] if len(res[0].scores)>i else None
-        }
-        out.append(d)
+            'attention': res[0].attention[i] if len(res[0].attention)>i else None
+        })
     print(out)
-    out_tok = ct2.translate_batch([txt_tok], **dec)[0].hypotheses[0]
+    #out_tok = ct2.translate_batch([txt_tok], **dec)[0].hypotheses[0]
     ct2_time = time.time() - tic
     logging.info(f'CT2: msec={1000 * (time.time() - tic):.2f} out_tok={out_tok}')
     
-    tic = time.time()
-    out = tok.detokenize(out_tok)
-    detok_time = time.time() - tic
-    logging.info(f'TOK: msec={1000 * (time.time() - tic):.2f} out={out}')
+#    tic = time.time()
+#    out = tok.detokenize(out_tok)
+#    detok_time = time.time() - tic
+#    logging.info(f'TOK: msec={1000 * (time.time() - tic):.2f} out={out}')
     
     return {
         'statusCode': 200,
         'body': {
             "txt": txt,
             "txt_tok": txt_tok,
-            "out_tok": out_tok,
+#            "out_tok": out_tok,
             "out": out,
             "msec": {
                 "load_tok": f"{1000 * load_tok_time:.2f}",
