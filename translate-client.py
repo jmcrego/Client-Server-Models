@@ -41,7 +41,7 @@ if __name__ == '__main__':
     parser.add_argument('--txt',     type=str,   help='text to translate', required=True)
     parser.add_argument('--cfg',     type=str,   help='config resources', required=True)
     parser.add_argument('--url',     type=str,   help='server url entry point', default='http://0.0.0.0:5000/translate')
-    parser.add_argument('--ct2',     type=str,   help='ctranslate2 inference JSON dictionary (see https://opennmt.net/CTranslate2/decoding.html for decoding options)', default='{"beam_size": 5, "num_hypotheses"=1}')
+    parser.add_argument('--ct2',     type=str,   help='ctranslate2 inference JSON dictionary (see https://opennmt.net/CTranslate2/decoding.html for decoding options)', default='{"beam_size": 5, "num_hypotheses": 1}')
     parser.add_argument('--timeout', type=float, help='url request timeout', default=10.0)
     args = parser.parse_args()
     args.ct2 = json.loads(args.ct2)
