@@ -60,7 +60,7 @@ def run(r):
             'statusCode': 400,
             'body': json.dumps({
                 "error": "missing required parameter in request",
-                "msec": 1000 * (time.time() - start_time)
+                "msec": f"{1000 * (time.time() - start_time):.2f}"
             })
         }
 
@@ -74,7 +74,7 @@ def run(r):
             'statusCode': 400,
             'body': {
                 "error": "resources unavailable",
-                "msec": 1000 * (time.time() - start_time)
+                "msec": f"{1000 * (time.time() - start_time):.2f}"
             }
         }
 
@@ -100,7 +100,7 @@ def run(r):
             "txt_tok": txt_tok,
             "out_tok": out_tok,
             "out": out,
-            "msec": 1000 * (time.time() - start_time)
+            "msec": f"{1000 * (time.time() - start_time):.2f}"
         }
     }
 
