@@ -89,7 +89,7 @@ def run(r):
     
     tic = time.time()
     out = []
-    res = ct2.translate_batch([tok], **dec)
+    res = Ct2.translate_batch([tok], **dec)
     for i in range(len(res[0].hypotheses)):
         out.append({
             'tok': res[0].hypotheses[i],
