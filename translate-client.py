@@ -5,8 +5,8 @@ import logging
 import argparse
 import requests
 
-def send_request_to_server(url, timeout, cfg, txt, ct2):
-    req = { 'cfg':cfg, 'txt':txt, 'ct2':ct2 }
+def send_request_to_server(url, timeout, cfg, dec, txt):
+    req = { 'cfg':cfg, 'dec': dec, 'txt':txt }
     try:
         response = requests.post(url, json=req, headers={"Content-Type": "application/json"}, timeout=timeout)
         response.raise_for_status()
