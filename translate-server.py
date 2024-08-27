@@ -54,12 +54,12 @@ def load_models_if_required(cfg):
 def run(r):
     start_time = time.time()
     cfg = r.pop('cfg', None)
-    txt = r.pop('txt', None)
+    txt = r.pop('txt', [])
     dec = r.pop('dec', {})
     logging.info(f"REQ: cfg={cfg} dec={dec} txt={txt}")
 
-    if txt is None or cfg is None:
-        logging.info(f'Error: missing required parameter in request')
+    if len(txt)==0 or cfg is None:
+        logging.info(f'Error: missing required parameter/s in request')
         return {
             'statusCode': 400,
             'body': json.dumps({
@@ -83,19 +83,30 @@ def run(r):
         }
     
     tic = time.time()
-    tok, _ = Tokenizer.tokenize(txt)
+    tok, _ = Tokenizer.tokenize_batch(txt)
+    assert len(tok) == len(txt)
     tok_time = time.time() - tic
     logging.info(f'TOK: msec={1000 * (time.time() - tic):.2f} tok={tok}')
     
+
     tic = time.time()
-    out = []
-    res = Translator.translate_batch([tok], **dec)
-    for i in range(len(res[0].hypotheses)):
-        out.append({
-            'tok': res[0].hypotheses[i],
-            'txt': Tokenizer.detokenize(res[0].hypotheses[i]),
-            'score': res[0].scores[i] if len(res[0].scores)>i else None,
-            'attention': res[0].attention[i] if len(res[0].attention)>i else None
+    trn = Translator.translate_batch(tok, **dec)
+    assert len(trn) == len(tok)
+
+    res = []
+    for i in range(len(trn)):
+        out = []
+        for j in range(len(trn[i].hypotheses)):
+            out.append({
+                'txt': Tokenizer.detokenize(trn[i].hypotheses[j]),
+                'tok': trn[i].hypotheses[j],
+                'score': trn[i].scores[j] if len(trn[i].scores)>i else None,
+                'attention': trn[i].attention[j] if len(trn[i].attention)>j else None
+            })
+        res.append({
+            'txt': txt[i],
+            'tok': tok[i],
+            'out': out
         })
     ct2_time = time.time() - tic
     logging.info(f'CT2: msec={1000 * (time.time() - tic):.2f} out={out}')
@@ -103,9 +114,7 @@ def run(r):
     return {
         'statusCode': 200,
         'body': {
-            "txt": txt,
-            "tok": tok,
-            "out": out,
+            "res": res,
             "msec": {
                 "load_tok": f"{1000 * load_tok_time:.2f}",
                 "load_ct2": f"{1000 * load_ct2_time:.2f}",
@@ -135,4 +144,5 @@ if __name__ == '__main__':
         return jsonify(run(request.json))
     
     app.run(host=args.host, port=args.port)
+
 
