@@ -38,11 +38,10 @@ def send_request_to_server(url, timeout, cfg, dec, txt):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='This script sends a request to a distant translation server.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--txt',     type=str,   help='text to translate')
-    parser.add_argument('--doc',     type=str,   help='document to translate')
-    parser.add_argument('--cfg',     type=str,   help='config resources', required=True)
-    parser.add_argument('--url',     type=str,   help='server url entry point', default='http://0.0.0.0:5000/translate')
-    parser.add_argument('--dec',     type=str,   help='ctranslate2 decoding options in JSON dictionary (see https://opennmt.net/CTranslate2/python/ctranslate2.Translator.html#ctranslate2.Translator.score_batch for available options)', default='{"beam_size": 5, "num_hypotheses": 1}')
+    parser.add_argument('--txt', type=str, nargs='+', help='list of strings to translate', required=True)
+    parser.add_argument('--cfg', type=str, help='config resources', required=True)
+    parser.add_argument('--url', type=str, help='server url entry point', default='http://0.0.0.0:5000/translate')
+    parser.add_argument('--dec', type=str, help='ctranslate2 decoding options in JSON dictionary (see https://opennmt.net/CTranslate2/python/ctranslate2.Translator.html#ctranslate2.Translator.score_batch for available options)', default='{"beam_size": 5, "num_hypotheses": 1}')
     parser.add_argument('--timeout', type=float, help='url request timeout', default=10.0)
     args = parser.parse_args()
     args.dec = json.loads(args.dec)
@@ -53,15 +52,7 @@ if __name__ == '__main__':
         sys.exit()
     
     tic = time.time()
-    if args.txt is not None:
-        out = send_request_to_server(args.url, args.timeout, args.cfg, args.dec, args.txt)
-        print(json.dumps(out, indent=4, ensure_ascii=False))
-
-    else:
-        with open(args.doc, 'r') as fd:
-            for l in fd:
-                out = send_request_to_server(args.url, args.timeout, args.cfg, args.dec, l.strip())
-                print(json.dumps(out, indent=4, ensure_ascii=False))
-                
+    out = send_request_to_server(args.url, args.timeout, args.cfg, args.dec, args.txt)
+    print(json.dumps(out, indent=4, ensure_ascii=False))                
     logging.info(f'client msec={1000*(time.time()-tic):.2f}')
         
