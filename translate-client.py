@@ -47,10 +47,6 @@ if __name__ == '__main__':
     args.dec = json.loads(args.dec)
     logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, 'INFO'), filename=None)
 
-    if (args.txt is None and args.doc is None) or (args.txt is not None and args.doc is not None):
-        logging.error('use either --txt or --doc')
-        sys.exit()
-    
     tic = time.time()
     out = send_request_to_server(args.url, args.timeout, args.cfg, args.dec, args.txt)
     print(json.dumps(out, indent=4, ensure_ascii=False))                
