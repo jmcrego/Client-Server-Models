@@ -86,12 +86,14 @@ def run(r):
     tok, _ = Tokenizer.tokenize_batch(txt)
     assert len(tok) == len(txt)
     tok_time = time.time() - tic
+    logging.info(f'tok={1000 * tok_time:.2f}ms')
     
 
     tic = time.time()
     trn = Translator.translate_batch(tok, **dec)
     assert len(trn) == len(tok)
     ct2_time = time.time() - tic
+    logging.info(f'ct2={1000 * ct2_time:.2f}ms')
 
     tic = time.time()
     res = []
@@ -110,7 +112,9 @@ def run(r):
             'out': out
         })
     res_time = time.time() - tic
-    logging.info(f'RES: tok={1000 * tok_time:.2f}ms ct2={1000 * ct2_time:.2f}ms res={1000 * res_time:.2f}ms {res}')
+    logging.info(f'res={1000 * res_time:.2f}ms')
+
+    logging.info(f'RES: {res}')
     
     return {
         'statusCode': 200,
