@@ -107,13 +107,13 @@ def run(r):
         for j in range(len(trn[i].hypotheses)):
             out.append({
                 'txt': Tokenizer.detokenize(trn[i].hypotheses[j]),
-                'tok': trn[i].hypotheses[j],
+                'tok': ' '.join(trn[i].hypotheses[j]),
                 'score': trn[i].scores[j] if len(trn[i].scores)>i else None,
                 'attention': trn[i].attention[j] if len(trn[i].attention)>j else None
             })
         res.append({
             'txt': txt[i],
-            'tok': tok[i],
+            'tok': ' '.join(tok[i]),
             'out': out
         })
     res_time = 1000*(time.time() - tic)
