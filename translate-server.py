@@ -103,9 +103,9 @@ def run(r):
     tic = time.time()
     data = []
     for i in range(len(trn)):
-        out = []
+        hyp = []
         for j in range(len(trn[i].hypotheses)):
-            out.append({
+            hyp.append({
                 'txt': Tokenizer.detokenize(trn[i].hypotheses[j]),
                 'tok': ' '.join(trn[i].hypotheses[j]),
                 'score': trn[i].scores[j] if len(trn[i].scores)>i else None,
@@ -114,7 +114,7 @@ def run(r):
         data.append({
             'txt': txt[i],
             'tok': ' '.join(tok[i]),
-            'out': out
+            'hyp': hyp
         })
     pos_time = 1000*(time.time() - tic)
     logging.info(f'pos={pos_time} ms')
