@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     tic = time.time()
     res = send_request_to_server(args.url, args.timeout, args.cfg, args.dec, args.txt)
-    print(json.dumps(res.get('data', {}), indent=4, ensure_ascii=False))                
-    print(json.dumps(res.get('stats', {}), indent=4, ensure_ascii=False))                
+    print('data = ' + json.dumps(res.get('data', {}), indent=4, ensure_ascii=False))                
+    print('stats = ' + json.dumps(res.get('stats', {}), indent=4, ensure_ascii=False))                
     logging.info(f'client msec={1000*(time.time()-tic)}')
         
