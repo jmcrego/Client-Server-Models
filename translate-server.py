@@ -135,6 +135,8 @@ def run(r):
     return {
         'statusCode': 200,
         'body': {
+            "cfg": loaded_cfg,
+            "dec": dec,
             "data": data,
             "time": {
                 "load_tok_ms": load_tok_time,
