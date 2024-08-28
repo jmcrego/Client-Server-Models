@@ -30,28 +30,30 @@ def load_models_if_required(cfg):
 
     global Tokenizer, Translator, loaded_cfg
 
-    if Tokenizer is None or cfg != loaded_cfg:
-        config = read_json_config(tok_config)
-        if config is not None:
-            tic = time.time()
-            if 'bpe_model_path' in config: ### the bpe file must be in the cfg directory
-                config['bpe_model_path'] = os.path.join(cfg, os.path.basename(config['bpe_model_path']))
-            mode = config.pop('mode', 'aggressive')
-            Tokenizer = pyonmttok.Tokenizer(mode, **config)
-            load_tok_time = 1000*(time.time() - tic)
-            logging.info(f'LOAD: msec={load_tok_time} tok_config={tok_config}')
+    if cfg is None:
+        if Tokenizer is None or cfg != loaded_cfg:
+            config = read_json_config(tok_config)
+            if config is not None:
+                tic = time.time()
+                if 'bpe_model_path' in config: ### the bpe file must be in the cfg directory
+                    config['bpe_model_path'] = os.path.join(cfg, os.path.basename(config['bpe_model_path']))
+                mode = config.pop('mode', 'aggressive')
+                Tokenizer = pyonmttok.Tokenizer(mode, **config)
+                load_tok_time = 1000*(time.time() - tic)
+                logging.info(f'LOAD: msec={load_tok_time} tok_config={tok_config}')
 
-    if Translator is None or cfg != loaded_cfg:
-        config = read_json_config(ct2_config)
-        if config is not None:
-            tic = time.time()
-            model_path = config.pop('model_path', None) ### delete it from config
-            model_path = cfg ### the model must be in the cfg directory  
-            Translator = ctranslate2.Translator(model_path, **config)
-            load_ct2_time = 1000*(time.time() - tic)
-            logging.info(f'LOAD: msec={load_ct2_time} ct2_config={ct2_config}')
+        if Translator is None or cfg != loaded_cfg:
+            config = read_json_config(ct2_config)
+            if config is not None:
+                tic = time.time()
+                model_path = config.pop('model_path', None) ### delete it from config
+                model_path = cfg ### the model must be in the cfg directory  
+                Translator = ctranslate2.Translator(model_path, **config)
+                load_ct2_time = 1000*(time.time() - tic)
+                logging.info(f'LOAD: msec={load_ct2_time} ct2_config={ct2_config}')
 
-    loaded_cfg = cfg
+        loaded_cfg = cfg
+        
     return load_tok_time, load_ct2_time
 
 def run(r):
@@ -83,8 +85,7 @@ def run(r):
             })
         }
     
-    if cfg is not None:
-        load_tok_time, load_ct2_time = load_models_if_required(cfg)
+    load_tok_time, load_ct2_time = load_models_if_required(cfg)
     
     global Tokenizer, Translator
     
