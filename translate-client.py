@@ -48,7 +48,7 @@ if __name__ == '__main__':
     logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, 'INFO'), filename=None)
 
     tic = time.time()
-    out = send_request_to_server(args.url, args.timeout, args.cfg, args.dec, args.txt)
-    print(json.dumps(out, indent=4, ensure_ascii=False))                
-    logging.info(f'client msec={1000*(time.time()-tic):.2f}')
+    res = send_request_to_server(args.url, args.timeout, args.cfg, args.dec, args.txt)
+    print(json.dumps(res['body'], indent=4, ensure_ascii=False))                
+    logging.info(f'client msec={1000*(time.time()-tic)}')
         
