@@ -27,7 +27,7 @@ def load_models_if_required(cfg):
 
     load_tok_time = 0.
     load_ct2_time = 0.
-    
+
     global Tokenizer, Translator, loaded_cfg
 
     if Tokenizer is None or cfg != loaded_cfg:
@@ -61,9 +61,9 @@ def run(r):
     dec = r.pop('dec', {})
     logging.info(f"REQ: cfg={cfg} dec={dec} txt={txt}")
 
-    if len(txt)==0 or cfg is None:
+    if len(txt)==0:
         end_time = 1000*time.time()
-        logging.info(f'Error: missing required parameter/s in request')
+        logging.info(f'Error: missing txt parameter in request')
         return {
             'statusCode': 400,
             'body': json.dumps({
@@ -72,7 +72,19 @@ def run(r):
             })
         }
 
-    load_tok_time, load_ct2_time = load_models_if_required(cfg)
+    if cfg_config is None and cfg is None:
+        end_time = 1000*time.time()
+        logging.info(f'Error: missing cfg parameter in request')
+        return {
+            'statusCode': 400,
+            'body': json.dumps({
+                "error": "missing required parameter in request",
+                "msec": end_time - start_time
+            })
+        }
+    
+    if cfg is not None:
+        load_tok_time, load_ct2_time = load_models_if_required(cfg)
     
     global Tokenizer, Translator
     
