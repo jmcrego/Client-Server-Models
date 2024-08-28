@@ -89,14 +89,14 @@ def run(r):
     tok, _ = Tokenizer.tokenize_batch(txt)
     assert len(tok) == len(txt)
     tok_time = time.time() - tic
-    logging.info(f'tok={1000 * tok_time:.2f}ms')
+    logging.info(f'tok={1000 * tok_time:.2f} ms')
     
 
     tic = time.time()
     trn = Translator.translate_batch(tok, **dec)
     assert len(trn) == len(tok)
     ct2_time = time.time() - tic
-    logging.info(f'ct2={1000 * ct2_time:.2f}ms')
+    logging.info(f'ct2={1000 * ct2_time:.2f} ms')
 
     tic = time.time()
     res = []
@@ -115,7 +115,7 @@ def run(r):
             'out': out
         })
     res_time = time.time() - tic
-    logging.info(f'res={1000 * res_time:.2f}ms')
+    logging.info(f'res={1000 * res_time:.2f} ms')
 
     logging.info(f'RES: {res}')
     
@@ -124,11 +124,16 @@ def run(r):
         'body': {
             "res": res,
             "msec": {
-                "load_tok": f"{1000 * load_tok_time:.2f}",
-                "load_ct2": f"{1000 * load_ct2_time:.2f}",
-                "tok": f"{1000 * tok_time:.2f}",
-                "ct2": f"{1000 * ct2_time:.2f}",
-                "total": f"{1000 * (time.time() - start_time):.2f}"
+                "load_tok": 1000 * load_tok_time,
+                "load_ct2": 1000 * load_ct2_time,
+                "tok": 1000 * tok_time,
+                "ct2": 1000 * ct2_time,
+                "total": 1000 * (time.time() - start_time)
+                #"load_tok": f"{1000 * load_tok_time:.2f}",
+                #"load_ct2": f"{1000 * load_ct2_time:.2f}",
+                #"tok": f"{1000 * tok_time:.2f}",
+                #"ct2": f"{1000 * ct2_time:.2f}",
+                #"total": f"{1000 * (time.time() - start_time):.2f}"
             }
         }
     }
