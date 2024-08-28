@@ -72,7 +72,7 @@ def run(r):
             })
         }
 
-    if cfg_config is None and cfg is None:
+    if loaded_cfg is None and cfg is None:
         end_time = 1000*time.time()
         logging.info(f'Error: missing cfg parameter in request')
         return {
