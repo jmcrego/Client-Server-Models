@@ -17,9 +17,6 @@ def send_request_to_server(url, timeout, instruction, text, N):
     except requests.exceptions.Timeout as e: 
         logging.error("POST Request Error (Timeout): %s", e)
         raise SystemExit(e)
-    except requests.exceptions.ConnectionError as e:
-        logging.error("POST Request Error (ConnectionError): %s", e)
-        raise SystemExit(e)
     except requests.exceptions.TooManyRedirects as e: 
         logging.error("POST Request Error (TooManyRedirects): %s", e)
         raise SystemExit(e)
