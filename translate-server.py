@@ -22,15 +22,14 @@ def load_models_if_required(cfg):
     '''                                                                                                                                                                                                                                                         
     Load tokenizers/ct2_model outside the handler to persist across invocations. Load only if not previously loaded with same cfg                                                                                                                               
     '''
-    tok_config = os.path.join(cfg, 'tok_config.json')
-    ct2_config = os.path.join(cfg, 'ct2_config.json')
-
     load_tok_time = 0.
     load_ct2_time = 0.
-
-    global Tokenizer, Translator, loaded_cfg
-
+    
     if cfg is not None:
+        tok_config = os.path.join(cfg, 'tok_config.json')
+        ct2_config = os.path.join(cfg, 'ct2_config.json')
+        global Tokenizer, Translator, loaded_cfg
+
         if Tokenizer is None or cfg != loaded_cfg:
             config = read_json_config(tok_config)
             if config is not None:
