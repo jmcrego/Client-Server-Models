@@ -25,8 +25,8 @@ def load_models_if_required(cfg):
     tok_config = os.path.join(cfg, 'tok_config.json')
     ct2_config = os.path.join(cfg, 'ct2_config.json')
 
-    load_tok_time = 0
-    load_ct2_time = 0
+    load_tok_time = 0.
+    load_ct2_time = 0.
     
     global Tokenizer, Translator, loaded_cfg
 
@@ -38,8 +38,8 @@ def load_models_if_required(cfg):
                 config['bpe_model_path'] = os.path.join(cfg, os.path.basename(config['bpe_model_path']))
             mode = config.pop('mode', 'aggressive')
             Tokenizer = pyonmttok.Tokenizer(mode, **config)
-            load_tok_time = time.time() - tic
-            logging.info(f'LOAD: msec={1000 * load_tok_time:.2f} tok_config={tok_config}')
+            load_tok_time = 1000*(time.time() - tic)
+            logging.info(f'LOAD: msec={load_tok_time} tok_config={tok_config}')
 
     if Translator is None or cfg != loaded_cfg:
         config = read_json_config(ct2_config)
@@ -48,26 +48,27 @@ def load_models_if_required(cfg):
             model_path = config.pop('model_path', None) ### delete it from config
             model_path = cfg ### the model must be in the cfg directory  
             Translator = ctranslate2.Translator(model_path, **config)
-            load_ct2_time = time.time() - tic
-            logging.info(f'LOAD: msec={1008 * load_ct2_time:.2f} ct2_config={ct2_config}')
+            load_ct2_time = 1000*(time.time() - tic)
+            logging.info(f'LOAD: msec={load_ct2_time} ct2_config={ct2_config}')
 
     loaded_cfg = cfg
     return load_tok_time, load_ct2_time
 
 def run(r):
-    start_time = time.time()
+    start_time = 1000*time.time()
     cfg = r.pop('cfg', None)
     txt = r.pop('txt', [])
     dec = r.pop('dec', {})
     logging.info(f"REQ: cfg={cfg} dec={dec} txt={txt}")
 
     if len(txt)==0 or cfg is None:
+        end_time = 1000*time.time()
         logging.info(f'Error: missing required parameter/s in request')
         return {
             'statusCode': 400,
             'body': json.dumps({
                 "error": "missing required parameter in request",
-                "msec": f"{1000 * (time.time() - start_time):.2f}"
+                "msec": end_time - start_time
             })
         }
 
@@ -76,27 +77,28 @@ def run(r):
     global Tokenizer, Translator
     
     if Tokenizer is None or Translator is None:
+        end_time = 1000*time.time()
         logging.info(f'error: resources unavailable')
         return {
             'statusCode': 400,
             'body': {
                 "error": "resources unavailable",
-                "msec": f"{1000 * (time.time() - start_time):.2f}"
+                "msec": end_time - start_time
             }
         }
     
     tic = time.time()
     tok, _ = Tokenizer.tokenize_batch(txt)
     assert len(tok) == len(txt)
-    tok_time = time.time() - tic
-    logging.info(f'tok={1000 * tok_time:.2f} ms')
+    tok_time = 1000*(time.time() - tic)
+    logging.info(f'tok={tok_time} ms')
     
 
     tic = time.time()
     trn = Translator.translate_batch(tok, **dec)
     assert len(trn) == len(tok)
-    ct2_time = time.time() - tic
-    logging.info(f'ct2={1000 * ct2_time:.2f} ms')
+    ct2_time = 1000*(time.time() - tic)
+    logging.info(f'ct2={ct2_time} ms')
 
     tic = time.time()
     res = []
@@ -114,26 +116,21 @@ def run(r):
             'tok': tok[i],
             'out': out
         })
-    res_time = time.time() - tic
-    logging.info(f'res={1000 * res_time:.2f} ms')
-
+    res_time = 1000*(time.time() - tic)
+    logging.info(f'res={res_time} ms')
     logging.info(f'RES: {res}')
-    
+
+    end_time = 1000*time.time()
     return {
         'statusCode': 200,
         'body': {
             "res": res,
             "msec": {
-                "load_tok": 1000 * load_tok_time,
-                "load_ct2": 1000 * load_ct2_time,
-                "tok": 1000 * tok_time,
-                "ct2": 1000 * ct2_time,
-                "total": 1000 * (time.time() - start_time)
-                #"load_tok": f"{1000 * load_tok_time:.2f}",
-                #"load_ct2": f"{1000 * load_ct2_time:.2f}",
-                #"tok": f"{1000 * tok_time:.2f}",
-                #"ct2": f"{1000 * ct2_time:.2f}",
-                #"total": f"{1000 * (time.time() - start_time):.2f}"
+                "load_tok": load_tok_time,
+                "load_ct2": load_ct2_time,
+                "tok": tok_time,
+                "ct2": ct2_time,
+                "total": end_time - start_time
             }
         }
     }
