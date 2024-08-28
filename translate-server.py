@@ -69,7 +69,7 @@ def run(r):
         return {
             'statusCode': 400,
             'body': json.dumps({
-                "error": "missing required parameter in request",
+                "error": "missing txt parameter in request",
                 "msec": end_time - start_time
             })
         }
@@ -80,7 +80,7 @@ def run(r):
         return {
             'statusCode': 400,
             'body': json.dumps({
-                "error": "missing required parameter in request",
+                "error": "missing cfg parameter in request",
                 "msec": end_time - start_time
             })
         }
