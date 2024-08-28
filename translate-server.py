@@ -101,7 +101,7 @@ def run(r):
     logging.info(f'ct2={ct2_time} ms')
 
     tic = time.time()
-    res = []
+    data = []
     for i in range(len(trn)):
         out = []
         for j in range(len(trn[i].hypotheses)):
@@ -111,26 +111,25 @@ def run(r):
                 'score': trn[i].scores[j] if len(trn[i].scores)>i else None,
                 'attention': trn[i].attention[j] if len(trn[i].attention)>j else None
             })
-        res.append({
+        data.append({
             'txt': txt[i],
             'tok': ' '.join(tok[i]),
             'out': out
         })
-    res_time = 1000*(time.time() - tic)
-    logging.info(f'res={res_time} ms')
-    logging.info(f'RES: {res}')
+    pos_time = 1000*(time.time() - tic)
+    logging.info(f'pos={pos_time} ms')
+    logging.info(f'DATA: {data}')
 
-    end_time = 1000*time.time()
     return {
         'statusCode': 200,
         'body': {
-            "res": res,
-            "msec": {
-                "load_tok": load_tok_time,
-                "load_ct2": load_ct2_time,
-                "tok": tok_time,
-                "ct2": ct2_time,
-                "total": end_time - start_time
+            "data": data,
+            "time": {
+                "load_tok_ms": load_tok_time,
+                "load_ct2_ms": load_ct2_time,
+                "tok_ms": tok_time,
+                "ct2_ms": ct2_time,
+                "pos_ms": pos_time,
             }
         }
     }
