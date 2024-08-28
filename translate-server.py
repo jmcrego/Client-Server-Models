@@ -63,24 +63,22 @@ def run(r):
     logging.info(f"REQ: cfg={cfg} dec={dec} txt={txt}")
 
     if len(txt)==0:
-        end_time = 1000*time.time()
         logging.info(f'Error: missing txt parameter in request')
         return {
             'statusCode': 400,
             'body': json.dumps({
                 "error": "missing txt parameter in request",
-                "msec": end_time - start_time
+                "msec": 1000*time.time() - start_time
             })
         }
 
     if loaded_cfg is None and cfg is None:
-        end_time = 1000*time.time()
         logging.info(f'Error: missing cfg parameter in request')
         return {
             'statusCode': 400,
             'body': json.dumps({
                 "error": "missing cfg parameter in request",
-                "msec": end_time - start_time
+                "msec": 1000*time.time() - start_time
             })
         }
     
@@ -89,13 +87,12 @@ def run(r):
     global Tokenizer, Translator
     
     if Tokenizer is None or Translator is None:
-        end_time = 1000*time.time()
         logging.info(f'error: resources unavailable')
         return {
             'statusCode': 400,
             'body': {
                 "error": "resources unavailable",
-                "msec": end_time - start_time
+                "msec": 1000*time.time() - start_time
             }
         }
     
