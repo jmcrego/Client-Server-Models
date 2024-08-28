@@ -134,17 +134,15 @@ def run(r):
 
     return {
         'statusCode': 200,
-        'body': {
-            "data": data,
-            "stat": {
-                "cfg": loaded_cfg,
-                "dec": dec,
-                "time_load_tok": load_tok_time,
-                "time_load_ct2": load_ct2_time,
-                "time_tok": tok_time,
-                "time_ct2": ct2_time,
-                "time_pos": pos_time
-            }
+        "data": data,
+        "stats": {
+            "cfg": loaded_cfg,
+            "dec": dec,
+            "time_load_tok": load_tok_time,
+            "time_load_ct2": load_ct2_time,
+            "time_tok": tok_time,
+            "time_ct2": ct2_time,
+            "time_pos": pos_time
         }
     }
         
