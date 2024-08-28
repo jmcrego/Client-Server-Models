@@ -30,7 +30,7 @@ def load_models_if_required(cfg):
 
     global Tokenizer, Translator, loaded_cfg
 
-    if cfg is None:
+    if cfg is not None:
         if Tokenizer is None or cfg != loaded_cfg:
             config = read_json_config(tok_config)
             if config is not None:
