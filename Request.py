@@ -30,5 +30,5 @@ def send_request_to_server(url, timeout, cfg, dec, txt):
     except json.JSONDecodeError as e:
         logging.error("Response body did not contain valid json: %s", e)
         raise SystemExit(e)
-    logging.debug('server request took {:.2f} msec'.format(1000*time.time()-tic))
+    logging.info('server request took {:.2f} msec'.format(1000*time.time()-tic))
     return res
