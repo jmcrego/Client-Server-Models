@@ -3,36 +3,7 @@ import time
 import json
 import logging
 import argparse
-import requests
-
-def send_request_to_server(url, timeout, cfg, dec, txt):
-    req = { 'cfg':cfg, 'dec': dec, 'txt':txt }
-    try:
-        response = requests.post(url, json=req, headers={"Content-Type": "application/json"}, timeout=timeout)
-        response.raise_for_status()
-    except requests.exceptions.ConnectionError as e:
-        logging.error("POST Request Error (ConnectionError): %s", e)
-        raise SystemExit(e)
-    except requests.exceptions.Timeout as e: 
-        logging.error("POST Request Error (Timeout): %s", e)
-        raise SystemExit(e)
-    except requests.exceptions.TooManyRedirects as e: 
-        logging.error("POST Request Error (TooManyRedirects): %s", e)
-        raise SystemExit(e)
-    except requests.exceptions.HTTPError as e:
-        logging.error("POST Request Error (HTTPError): %s", e)
-        raise SystemExit(e)
-    except requests.exceptions.RequestException as e: 
-        logging.error("POST Request Error (RequestException): %s", e)
-        raise SystemExit(e)
-
-    try:
-        out = response.json()
-    except json.JSONDecodeError as e:
-        logging.error("Response body did not contain valid json: %s", e)
-        raise SystemExit(e)
-    return out
-
+from request import send_request_to_server
 
 if __name__ == '__main__':
 
@@ -46,9 +17,7 @@ if __name__ == '__main__':
     args.dec = json.loads(args.dec)
     logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=logging.INFO, filename=None)
 
-    tic = time.time()
     res = send_request_to_server(args.url, args.timeout, args.cfg, args.dec, args.txt)
-    logging.info(f'response received after {1000*(time.time()-tic)} ms')
     print('data = ' + json.dumps(res.get('data', {}), indent=4, ensure_ascii=False))                
     print('conf = ' + json.dumps(res.get('conf', {}), indent=4, ensure_ascii=False))                
     print('time = ' + json.dumps(res.get('time', {}), indent=4, ensure_ascii=False))                

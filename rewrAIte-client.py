@@ -3,36 +3,8 @@ import sys
 import time
 import logging
 import argparse
-import requests
+from request import send_request_to_server
 
-def send_request_to_server(url, timeout, instruction, text, N):
-    req = { 'instruction':instruction, 'text':text, 'N': N}
-    tic = time.time()
-    try:
-        response = requests.post(url, json=req, headers={"Content-Type": "application/json"}, timeout=timeout)
-        response.raise_for_status()
-    except requests.exceptions.ConnectionError as e:
-        logging.error("POST Request Error (ConnectionError): %s", e)
-        raise SystemExit(e)
-    except requests.exceptions.Timeout as e: 
-        logging.error("POST Request Error (Timeout): %s", e)
-        raise SystemExit(e)
-    except requests.exceptions.TooManyRedirects as e: 
-        logging.error("POST Request Error (TooManyRedirects): %s", e)
-        raise SystemExit(e)
-    except requests.exceptions.HTTPError as e:
-        logging.error("POST Request Error (HTTPError): %s", e)
-        raise SystemExit(e)
-    except requests.exceptions.RequestException as e: 
-        logging.error("POST Request Error (RequestException): %s", e)
-        raise SystemExit(e)
-    try:
-        out = response.json()
-    except requests.exceptions.JSONDecodeError as e:
-        logging.error("Response body did not contain valid json: %s", e)
-        raise SystemExit(e)
-    logging.debug('server request took {:.2f} sec'.format(time.time()-tic))
-    return out
 
 if __name__ == '__main__':
 
@@ -64,8 +36,8 @@ Example:
 
 All your sentences must be grammatically correct and convey the same meaning. Your output does not contain explanations. You write in {args.lang}, with expertise in the {args.domain} domain, using a {args.style} style and a {args.level} rewriting level."""
 
-    out = send_request_to_server(args.url, args.timeout, instruction, text, 10)['hyp']
-    for i,l in enumerate(out.split('\n')):
+    res = send_request_to_server(args.url, args.timeout, instruction, text, 10)['hyp']
+    for i,l in enumerate(res.split('\n')):
         if len(l):
             print(l)
 
