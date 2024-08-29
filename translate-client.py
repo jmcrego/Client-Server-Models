@@ -3,7 +3,7 @@ import time
 import json
 import logging
 import argparse
-from request import send_request_to_server
+from Request import send_request_to_server
 
 if __name__ == '__main__':
 
