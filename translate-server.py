@@ -135,7 +135,7 @@ def run(r):
         "conf": {
             "cfg": loaded_cfg,
             "dec": dec
-        }
+        },
         "time": {
             "load_tok": load_tok_time,
             "load_ct2": load_ct2_time,
