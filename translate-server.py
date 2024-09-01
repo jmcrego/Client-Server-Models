@@ -28,6 +28,8 @@ def load_models_if_required(cfg):
     load_tok_time = 0.
     load_ct2_time = 0.
 
+    global Tokenizer, Translator, loaded_cfg
+    
     if cfg is None or not os.path.isdir(cfg) or cfg == loaded_cfg:
         return load_tok_time, load_ct2_time
     
@@ -47,7 +49,6 @@ def load_models_if_required(cfg):
     if 'bpe_model_path' in config_tok: ### the bpe file must be in the cfg directory
         config_tok['bpe_model_path'] = os.path.join(cfg, os.path.basename(config['bpe_model_path']))
     mode = config_tok.pop('mode', 'aggressive')
-    global Tokenizer
     Tokenizer = pyonmttok.Tokenizer(mode, **config_tok)
     load_tok_time = 1000*(time.time() - tic)
     logging.info(f'LOAD: msec={load_tok_time} tok_config={tok_config}')
@@ -55,12 +56,10 @@ def load_models_if_required(cfg):
     tic = time.time()
     model_path = config_ct2.pop('model_path', None) ### delete it from config
     model_path = cfg ### the model must be in the cfg directory  
-    global Translator
     Translator = ctranslate2.Translator(model_path, **config_ct2)
     load_ct2_time = 1000*(time.time() - tic)
     logging.info(f'LOAD: msec={load_ct2_time} ct2_config={ct2_config}')
 
-    global loaded_cfg
     loaded_cfg = cfg
         
     return load_tok_time, load_ct2_time
