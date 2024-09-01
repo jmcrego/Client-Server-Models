@@ -168,6 +168,6 @@ if __name__ == '__main__':
         return jsonify(run(request.json))
     
     #app.run(host=args.host, port=args.port)
-    app.run(host=args.host, port=args.port, threaded=True)
+    #comment this if using gunicorn: app.run(host=args.host, port=args.port, threaded=True)
 
 
