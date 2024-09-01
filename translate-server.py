@@ -11,6 +11,8 @@ from socketserver import ThreadingMixIn
 Tokenizer = None
 Translator = None
 loaded_cfg = None
+logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, 'INFO'), filename=None)
+
 
 def read_json_config(config_file):
     config = None
@@ -162,7 +164,6 @@ if __name__ == '__main__':
     parser.add_argument('--port', type=int, help='Port used in local server', default=5000)
     parser.add_argument('--cfg',  type=str, help='Load model when launching', default=None)
     args = parser.parse_args()
-    logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, 'INFO'), filename=None)
 
     if args.cfg is not None:
         _, _ = load_models_if_required(args.cfg)
