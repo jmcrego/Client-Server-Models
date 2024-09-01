@@ -149,6 +149,12 @@ def run(r):
 class ThreadedFlaskServer(ThreadingMixIn, Flask):
     pass
 
+#app = Flask(__name__)
+app = ThreadedFlaskServer(__name__) #for multithreading
+@app.route('/translate', methods=['POST'])
+def translate():
+    return jsonify(run(request.json))
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Description.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -161,13 +167,8 @@ if __name__ == '__main__':
     if args.cfg is not None:
         _, _ = load_models_if_required(args.cfg)
     
-    #app = Flask(__name__)
-    app = ThreadedFlaskServer(__name__)
-    @app.route('/translate', methods=['POST'])
-    def translate():
-        return jsonify(run(request.json))
-    
-    #app.run(host=args.host, port=args.port)
+    # You can run Flask directly using app.run() for development:    
+    app.run(host=args.host, port=args.port)
     #comment this if using gunicorn: app.run(host=args.host, port=args.port, threaded=True)
-
+    #if using gunicorn, configure the address via gunicorn
 
