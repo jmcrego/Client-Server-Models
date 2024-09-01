@@ -6,6 +6,7 @@ import argparse
 import pyonmttok
 import ctranslate2
 from flask import Flask, request, jsonify
+from socketserver import ThreadingMixIn
 
 Tokenizer = None
 Translator = None
@@ -145,7 +146,9 @@ def run(r):
         }
     }
         
-        
+class ThreadedFlaskServer(ThreadingMixIn, Flask):
+    pass
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Description.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -158,11 +161,13 @@ if __name__ == '__main__':
     if args.cfg is not None:
         _, _ = load_models_if_required(args.cfg)
     
-    app = Flask(__name__)    
+    #app = Flask(__name__)
+    app = ThreadedFlaskServer(__name__)
     @app.route('/translate', methods=['POST'])
-    def send_data():
+    def translate():
         return jsonify(run(request.json))
     
-    app.run(host=args.host, port=args.port)
+    #app.run(host=args.host, port=args.port)
+    app.run(host=args.host, port=args.port, threaded=True)
 
 
