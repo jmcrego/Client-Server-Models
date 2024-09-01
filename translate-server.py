@@ -47,7 +47,7 @@ def load_models_if_required(cfg):
                 
     tic = time.time()
     if 'bpe_model_path' in config_tok: ### the bpe file must be in the cfg directory
-        config_tok['bpe_model_path'] = os.path.join(cfg, os.path.basename(config['bpe_model_path']))
+        config_tok['bpe_model_path'] = os.path.join(cfg, os.path.basename(config_tok['bpe_model_path']))
     mode = config_tok.pop('mode', 'aggressive')
     Tokenizer = pyonmttok.Tokenizer(mode, **config_tok)
     load_tok_time = 1000*(time.time() - tic)
