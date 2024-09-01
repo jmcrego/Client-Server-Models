@@ -14,13 +14,6 @@ loaded_cfg = None
 logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=getattr(logging, 'INFO'), filename=None)
 
 
-def read_json_config(config_file):
-    config = None
-    if os.path.isfile(config_file):
-        with open(config_file, 'r') as file:
-            config = json.load(file)
-    return config
-
 def load_models_if_required(cfg):
     '''                                                                                                                                                                                                                                                         
     Load tokenizers/ct2_model outside the handler to persist across invocations. Load only if not previously loaded with same cfg                                                                                                                               
@@ -36,9 +29,19 @@ def load_models_if_required(cfg):
     tok_config = os.path.join(cfg, 'tok_config.json')
     ct2_config = os.path.join(cfg, 'ct2_config.json')
 
-    if not os.path.isfile(tok_config) or not os.path.isfile(ct2_config):
-        return load_tok_time, load_ct2_time
-        
+    def read_json_config(config_file):
+        if os.path.isfile(config_file):
+            try:
+                with open(config_file, 'r') as file:
+                    content = file.read()
+                    config = json.loads(content)
+                    return config
+            except (json.JSONDecodeError, IOError):
+                return None
+            except Exception:
+                return None
+        return None
+
     config_tok = read_json_config(tok_config)
     config_ct2 = read_json_config(ct2_config)
 
