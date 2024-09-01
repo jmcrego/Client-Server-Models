@@ -18,7 +18,7 @@ if __name__ == '__main__':
     logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=logging.INFO, filename=None)
 
     res = send_request_to_server(args.url, args.timeout, args.cfg, args.dec, args.txt)
-    print('data = ' + json.dumps(res.get('data', {}), indent=4, ensure_ascii=False))                
-    print('conf = ' + json.dumps(res.get('conf', {}), indent=4, ensure_ascii=False))                
-    print('time = ' + json.dumps(res.get('time', {}), indent=4, ensure_ascii=False))                
+    print('res = ' + json.dumps(res, indent=4, ensure_ascii=False))                
+    #print('conf = ' + json.dumps(res.get('conf', {}), indent=4, ensure_ascii=False))                
+    #print('time = ' + json.dumps(res.get('time', {}), indent=4, ensure_ascii=False))                
         
