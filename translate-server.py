@@ -167,8 +167,11 @@ if __name__ == '__main__':
     if args.cfg is not None:
         _, _ = load_models_if_required(args.cfg)
     
-    # You can run Flask directly using app.run() for development:    
-    app.run(host=args.host, port=args.port)
-    #comment this if using gunicorn: app.run(host=args.host, port=args.port, threaded=True)
-    #if using gunicorn, configure the address via gunicorn
+    # You can run Flask directly using app.run() for development (via this script):
+    #use the next line without multithreading:
+    #app.run(host=args.host, port=args.port)
+    #or the next line with multithreading
+    #comment this if using gunicorn:
+    app.run(host=args.host, port=args.port, threaded=True)
+    #if using gunicorn, configure the address via gunicorn, Ex: gunicorn -w 1 --threads 100 translate-server:app -b 0.0.0.0:5000
 
